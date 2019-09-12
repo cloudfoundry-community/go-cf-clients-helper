@@ -31,8 +31,8 @@ func main() {
 	// get access to cf api v2 (incomplete api)
 	session.V2()
 	
-	// get access to cf api v3 (complete and always up to date api)
-    session.V3()
+	// get access to cf api v3 (complete and always up to date api) 
+	session.V3()
 	
 	// Get access to api uaa (incomplete)
 	session.UAA()
