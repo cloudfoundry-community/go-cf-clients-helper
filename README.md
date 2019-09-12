@@ -50,8 +50,8 @@ func main() {
 	h := clients.NewNOAAHelper(session.NOAA(), session.ConfigStore())
 	msgs, err := h.RecentLogs("app-guid", 0) // 0 means no limit of messages to see
 	if err != nil {
-        panic(err)
-    }
+            panic(err)
+        }
 	fmt.Println(msgs)
 	
 	// Get an http client which pass authorization header to call api(s) directly 
@@ -59,7 +59,5 @@ func main() {
     
 	// Get config store for client which need, for example, current access token (e.g.: NOAA) 
 	session.ConfigStore()
-	
-	
 }
 ```
