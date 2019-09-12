@@ -25,6 +25,7 @@ type Session struct {
 	clientV2  *ccv2.Client
 	clientV3  *ccv3.Client
 	clientUAA *uaa.Client
+	rawClient *RawClient
 
 	// To call tcp routing with this router
 	routerClient *router.Client
@@ -35,7 +36,8 @@ type Session struct {
 	// netClient permit to access to networking policy api
 	netClient *cfnetv1.Client
 
-	config Config
+	config      Config
+	configStore *configv3.Config
 }
 
 // NewSession -
@@ -68,6 +70,7 @@ func NewSession(c Config) (s *Session, err error) {
 			BinaryName: "terraform-provider",
 		},
 	}
+	s.configStore = config
 	uaaClientId := c.UaaClientID
 	uaaClientSecret := c.UaaClientSecret
 	if uaaClientId == "" {
@@ -118,6 +121,16 @@ func (s *Session) Networking() *cfnetv1.Client {
 // Give access to logs api and metrics through noaa
 func (s *Session) NOAA() *noaaconsumer.Consumer {
 	return s.noaaClient
+}
+
+// Give an http client which pass authorization header to call api(s) directly
+func (s *Session) Raw() *RawClient {
+	return s.rawClient
+}
+
+// Give config store for client which need access token (e.g.: NOAA)
+func (s *Session) ConfigStore() *configv3.Config {
+	return s.configStore
 }
 
 func (s *Session) init(config *configv3.Config, configUaa *configv3.Config, configSess Config) error {
@@ -299,7 +312,11 @@ func (s *Session) init(config *configv3.Config, configUaa *configv3.Config, conf
 	if s.IsDebugMode() {
 		rawWrappers = append(rawWrappers, ccWrapper.NewRequestLogger(NewRequestLogger()))
 	}
-
+	s.rawClient = NewRawClient(RawClientConfig{
+		ApiEndpoint:       config.Target(),
+		SkipSSLValidation: config.SkipSSLValidation(),
+		DialTimeout:       config.DialTimeout(),
+	}, rawWrappers...)
 	// -------------------------
 
 	// -------------------------
