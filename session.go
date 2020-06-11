@@ -1,6 +1,11 @@
 package clients
 
 import (
+	"crypto/tls"
+	"fmt"
+	"net/http"
+	"strings"
+
 	"code.cloudfoundry.org/cfnetworking-cli-api/cfnetworking/cfnetv1"
 	netWrapper "code.cloudfoundry.org/cfnetworking-cli-api/cfnetworking/wrapper"
 	"code.cloudfoundry.org/cli/api/cloudcontroller/ccv2"
@@ -13,11 +18,7 @@ import (
 	uaaWrapper "code.cloudfoundry.org/cli/api/uaa/wrapper"
 	"code.cloudfoundry.org/cli/command/translatableerror"
 	"code.cloudfoundry.org/cli/util/configv3"
-	"crypto/tls"
-	"fmt"
 	noaaconsumer "github.com/cloudfoundry/noaa/consumer"
-	"net/http"
-	"strings"
 )
 
 // Session - wraps the available clients from CF cli
@@ -180,7 +181,7 @@ func (s *Session) init(config *configv3.Config, configUaa *configv3.Config, conf
 		return translatableerror.AuthorizationEndpointNotFoundError{}
 	}
 
-	_, err = ccClientV3.TargetCF(ccv3.TargetSettings{
+	_, _, err = ccClientV3.TargetCF(ccv3.TargetSettings{
 		URL:               config.Target(),
 		SkipSSLValidation: config.SkipSSLValidation(),
 		DialTimeout:       config.DialTimeout(),
