@@ -213,11 +213,13 @@ func (s *Session) init(config *configv3.Config, configUaa *configv3.Config, conf
 			"username": config.CFUsername(),
 			"password": config.CFPassword(),
 		}, "", constant.GrantTypePassword)
+		config.SetUAAGrantType(string(constant.GrantTypePassword))
 	} else if config.UAAOAuthClient() != "cf" {
 		accessToken, refreshToken, err = uaaClient.Authenticate(map[string]string{
 			"client_id":     config.UAAOAuthClient(),
 			"client_secret": config.UAAOAuthClientSecret(),
 		}, "", constant.GrantTypeClientCredentials)
+		config.SetUAAGrantType(string(constant.GrantTypeClientCredentials))
 	}
 	if err != nil {
 		return fmt.Errorf("Error when authenticate on cf: %s", err)
@@ -261,11 +263,13 @@ func (s *Session) init(config *configv3.Config, configUaa *configv3.Config, conf
 				"username": config.CFUsername(),
 				"password": config.CFPassword(),
 			}, "", constant.GrantTypePassword)
+			configUaa.SetUAAGrantType(string(constant.GrantTypePassword))
 		} else {
 			accessTokenSess, refreshTokenSess, err = uaaClientSess.Authenticate(map[string]string{
 				"client_id":     configUaa.UAAOAuthClient(),
 				"client_secret": configUaa.UAAOAuthClientSecret(),
 			}, "", constant.GrantTypeClientCredentials)
+			configUaa.SetUAAGrantType(string(constant.GrantTypeClientCredentials))
 		}
 
 		if err != nil {
