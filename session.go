@@ -1,14 +1,11 @@
 package clients
 
 import (
-	"crypto/tls"
 	"fmt"
-	"net/http"
 	"strings"
 
 	"code.cloudfoundry.org/cfnetworking-cli-api/cfnetworking/cfnetv1"
 	netWrapper "code.cloudfoundry.org/cfnetworking-cli-api/cfnetworking/wrapper"
-	"code.cloudfoundry.org/cli/api/cloudcontroller/ccv2"
 	"code.cloudfoundry.org/cli/api/cloudcontroller/ccv3"
 	ccWrapper "code.cloudfoundry.org/cli/api/cloudcontroller/wrapper"
 	"code.cloudfoundry.org/cli/api/router"
@@ -16,23 +13,17 @@ import (
 	"code.cloudfoundry.org/cli/api/uaa"
 	"code.cloudfoundry.org/cli/api/uaa/constant"
 	uaaWrapper "code.cloudfoundry.org/cli/api/uaa/wrapper"
-	"code.cloudfoundry.org/cli/command/translatableerror"
 	"code.cloudfoundry.org/cli/util/configv3"
-	noaaconsumer "github.com/cloudfoundry/noaa/consumer"
 )
 
 // Session - wraps the available clients from CF cli
 type Session struct {
-	clientV2  *ccv2.Client
 	clientV3  *ccv3.Client
 	clientUAA *uaa.Client
 	rawClient *RawClient
 
 	// To call tcp routing with this router
 	routerClient *router.Client
-
-	// noaaClient permit to access to apps logs and metrics
-	noaaClient *noaaconsumer.Consumer
 
 	// netClient permit to access to networking policy api
 	netClient *cfnetv1.Client
@@ -94,11 +85,6 @@ func NewSession(c Config) (s *Session, err error) {
 	return s, nil
 }
 
-// Give access to api cf v2 (incomplete)
-func (s *Session) V2() *ccv2.Client {
-	return s.clientV2
-}
-
 // Give access to api cf v3 (complete and always up to date, thanks to cli v7 team)
 func (s *Session) V3() *ccv3.Client {
 	return s.clientV3
@@ -119,47 +105,26 @@ func (s *Session) Networking() *cfnetv1.Client {
 	return s.netClient
 }
 
-// Give access to logs api and metrics through noaa
-func (s *Session) NOAA() *noaaconsumer.Consumer {
-	return s.noaaClient
-}
-
 // Give an http client which pass authorization header to call api(s) directly
 func (s *Session) Raw() *RawClient {
 	return s.rawClient
 }
 
-// Give config store for client which need access token (e.g.: NOAA)
+// Give config store for client which need access token
 func (s *Session) ConfigStore() *configv3.Config {
 	return s.configStore
 }
 
 func (s *Session) init(config *configv3.Config, configUaa *configv3.Config, configSess Config) error {
-	// -------------------------
-	// Create v3 and v2 clients
-	ccWrappersV2 := []ccv2.ConnectionWrapper{}
 	ccWrappersV3 := []ccv3.ConnectionWrapper{}
-	authWrapperV2 := ccWrapper.NewUAAAuthentication(nil, config)
 	authWrapperV3 := ccWrapper.NewUAAAuthentication(nil, config)
 
-	ccWrappersV2 = append(ccWrappersV2, authWrapperV2)
-	ccWrappersV2 = append(ccWrappersV2, ccWrapper.NewRetryRequest(config.RequestRetryCount()))
-	if s.IsDebugMode() {
-		ccWrappersV2 = append(ccWrappersV2, ccWrapper.NewRequestLogger(NewRequestLogger()))
-	}
 
 	ccWrappersV3 = append(ccWrappersV3, authWrapperV3)
 	ccWrappersV3 = append(ccWrappersV3, ccWrapper.NewRetryRequest(config.RequestRetryCount()))
 	if s.IsDebugMode() {
 		ccWrappersV3 = append(ccWrappersV3, ccWrapper.NewRequestLogger(NewRequestLogger()))
 	}
-	ccClientV2 := ccv2.NewClient(ccv2.Config{
-		AppName:            config.BinaryName(),
-		AppVersion:         config.BinaryVersion(),
-		JobPollingTimeout:  config.OverallPollingTimeout(),
-		JobPollingInterval: config.PollingInterval(),
-		Wrappers:           ccWrappersV2,
-	})
 
 	ccClientV3 := ccv3.NewClient(ccv3.Config{
 		AppName:            config.BinaryName(),
@@ -169,37 +134,25 @@ func (s *Session) init(config *configv3.Config, configUaa *configv3.Config, conf
 		Wrappers:           ccWrappersV3,
 	})
 
-	_, err := ccClientV2.TargetCF(ccv2.TargetSettings{
+	ccClientV3.TargetCF(ccv3.TargetSettings{
 		URL:               config.Target(),
 		SkipSSLValidation: config.SkipSSLValidation(),
 		DialTimeout:       config.DialTimeout(),
 	})
+	info, _, err := ccClientV3.GetInfo()
 	if err != nil {
-		return fmt.Errorf("Error creating ccv2 client: %s", err)
-	}
-	if ccClientV2.AuthorizationEndpoint() == "" {
-		return translatableerror.AuthorizationEndpointNotFoundError{}
+		return fmt.Errorf("Could not fetch api root informations: %s", err)
 	}
 
-	_, _, err = ccClientV3.TargetCF(ccv3.TargetSettings{
-		URL:               config.Target(),
-		SkipSSLValidation: config.SkipSSLValidation(),
-		DialTimeout:       config.DialTimeout(),
-	})
-	if err != nil {
-		return fmt.Errorf("Error creating ccv3 client: %s", err)
-	}
-	// -------------------------
-
-	// -------------------------
 	// create an uaa client with cf_username/cf_password or client_id/client secret
-	// to use it in v2 and v3 api for authenticate requests
+	// to use it for authenticate requests
 	uaaClient := uaa.NewClient(config)
+	uaaClient.GetAPIVersion()
 
 	uaaAuthWrapper := uaaWrapper.NewUAAAuthentication(nil, configUaa)
 	uaaClient.WrapConnection(uaaAuthWrapper)
 	uaaClient.WrapConnection(uaaWrapper.NewRetryRequest(config.RequestRetryCount()))
-	err = uaaClient.SetupResources(ccClientV2.AuthorizationEndpoint())
+	err = uaaClient.SetupResources(info.UAA(), info.Login())
 	if err != nil {
 		return fmt.Errorf("Error setup resource uaa: %s", err)
 	}
@@ -234,12 +187,10 @@ func (s *Session) init(config *configv3.Config, configUaa *configv3.Config, conf
 	// -------------------------
 	// assign uaa client to request wrappers
 	uaaAuthWrapper.SetClient(uaaClient)
-	authWrapperV2.SetClient(uaaClient)
 	authWrapperV3.SetClient(uaaClient)
 	// -------------------------
 
 	// store client in the sessions
-	s.clientV2 = ccClientV2
 	s.clientV3 = ccClientV3
 	// -------------------------
 
@@ -251,7 +202,7 @@ func (s *Session) init(config *configv3.Config, configUaa *configv3.Config, conf
 		uaaAuthWrapperSess := uaaWrapper.NewUAAAuthentication(nil, configUaa)
 		uaaClientSess.WrapConnection(uaaAuthWrapperSess)
 		uaaClientSess.WrapConnection(uaaWrapper.NewRetryRequest(config.RequestRetryCount()))
-		err = uaaClientSess.SetupResources(ccClientV2.AuthorizationEndpoint())
+		err = uaaClientSess.SetupResources(info.UAA(), info.Login())
 		if err != nil {
 			return fmt.Errorf("Error setup resource uaa: %s", err)
 		}
@@ -333,7 +284,7 @@ func (s *Session) init(config *configv3.Config, configUaa *configv3.Config, conf
 			DialTimeout:       config.DialTimeout(),
 			SkipSSLValidation: config.SkipSSLValidation(),
 		},
-		RoutingEndpoint: ccClientV2.RoutingEndpoint(),
+		RoutingEndpoint: info.Routing(),
 	}
 
 	routerWrappers := []router.ConnectionWrapper{}
@@ -346,13 +297,6 @@ func (s *Session) init(config *configv3.Config, configUaa *configv3.Config, conf
 	routerConfig.Wrappers = routerWrappers
 
 	s.routerClient = router.NewClient(routerConfig)
-	// -------------------------
-
-	// -------------------------
-	// Create NOAA client for accessing logs from an app
-	s.noaaClient = noaaconsumer.New(s.clientV3.Logging(), &tls.Config{
-		InsecureSkipVerify: config.SkipSSLValidation(),
-	}, http.ProxyFromEnvironment)
 	// -------------------------
 
 	return nil
