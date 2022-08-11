@@ -21,4 +21,6 @@ type Config struct {
 	SkipSslValidation bool
 	// Show debug trace
 	Debug bool
+	// Binary name that will be used as user-agent
+	BinName string
 }

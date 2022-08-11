@@ -59,7 +59,7 @@ func NewSession(c Config) (s *Session, err error) {
 		ENV: configv3.EnvOverride{
 			CFUsername: c.User,
 			CFPassword: c.Password,
-			BinaryName: "terraform-provider",
+			BinaryName: c.BinName,
 		},
 	}
 	s.configStore = config
