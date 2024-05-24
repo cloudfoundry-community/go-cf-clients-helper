@@ -4,8 +4,8 @@ code.cloudfoundry.org/cfnetworking-cli-api v0.0.0-20190103195135-4b04f26287a6 h1
 code.cloudfoundry.org/cfnetworking-cli-api v0.0.0-20190103195135-4b04f26287a6/go.mod h1:u5FovqC5GGAEbFPz+IdjycDA+gIjhUwqxnu0vbHwVeM=
 code.cloudfoundry.org/cli v0.0.0-20240524142151-a2a685b5ea6e h1:CUEuy2mb1jF2gEHPrko123Z3ywiqNqgXx8070BU24SU=
 code.cloudfoundry.org/cli v0.0.0-20240524142151-a2a685b5ea6e/go.mod h1:m/D1YFfmfYchdZDeYYtNpU7NHP2LHnmQ1sxdDPy2ki8=
-code.cloudfoundry.org/cli-plugin-repo v0.0.0-20230525012251-b9c89116786e h1:S3mdVd/uTwYYtrf5j9feucRuTqb05SsO5D1H2Mj09ao=
-code.cloudfoundry.org/cli-plugin-repo v0.0.0-20230525012251-b9c89116786e/go.mod h1:R1EiyOAr7lW0l/YkZNqItUNZ01Q/dYUfbTn4X4Z+82M=
+code.cloudfoundry.org/cli-plugin-repo v0.0.0-20240520170503-e7ed9c7432a0 h1:AqfPzPhykvxSpxMkDdZMSJrCbxMQ0rugvDB3BuqD0DE=
+code.cloudfoundry.org/cli-plugin-repo v0.0.0-20240520170503-e7ed9c7432a0/go.mod h1:R1EiyOAr7lW0l/YkZNqItUNZ01Q/dYUfbTn4X4Z+82M=
 code.cloudfoundry.org/clock v1.1.0 h1:XLzC6W3Ah/Y7ht1rmZ6+QfPdt1iGWEAAtIZXgiaj57c=
 code.cloudfoundry.org/clock v1.1.0/go.mod h1:yA3fxddT9RINQL2XHS7PS+OXxKCGhfrZmlNUCIM6AKo=
 code.cloudfoundry.org/diego-ssh v0.0.0-20230810200140-af9d79fe9c82 h1:Bns1y0jSlcvfP0u8ael+TUlnyNHsNX808zuo58bf5so=

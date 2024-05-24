@@ -58,7 +58,7 @@ code.cloudfoundry.org/cli/util/sorting
 code.cloudfoundry.org/cli/util/ui
 code.cloudfoundry.org/cli/util/unique
 code.cloudfoundry.org/cli/version
-# code.cloudfoundry.org/cli-plugin-repo v0.0.0-20230525012251-b9c89116786e
+# code.cloudfoundry.org/cli-plugin-repo v0.0.0-20240520170503-e7ed9c7432a0
 ## explicit; go 1.12
 # code.cloudfoundry.org/clock v1.1.0
 ## explicit; go 1.20
