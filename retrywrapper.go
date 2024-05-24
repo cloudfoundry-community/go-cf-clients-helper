@@ -5,6 +5,7 @@ import (
 	"code.cloudfoundry.org/cli/api/cloudcontroller"
 	"code.cloudfoundry.org/cli/api/cloudcontroller/ccerror"
 	"code.cloudfoundry.org/cli/api/router"
+	"errors"
 	"io"
 	"net/http"
 	"reflect"
@@ -59,7 +60,8 @@ func (retry *RetryRequest) Make(request *cloudcontroller.Request, passedResponse
 		if reader, ok := request.Body.(io.ReadSeeker); ok {
 			_, resetErr := reader.Seek(0, 0)
 			if resetErr != nil {
-				if _, ok := resetErr.(ccerror.PipeSeekError); ok {
+				var pipeSeekError ccerror.PipeSeekError
+				if errors.As(resetErr, &pipeSeekError) {
 					return ccerror.PipeSeekError{Err: err}
 				}
 				return resetErr
@@ -130,7 +132,8 @@ func (retry *retryRequestRouter) Make(request *router.Request, passedResponse *r
 		if reader, ok := request.Body.(io.ReadSeeker); ok {
 			_, resetErr := reader.Seek(0, 0)
 			if resetErr != nil {
-				if _, ok := resetErr.(ccerror.PipeSeekError); ok {
+				var pipeSeekError ccerror.PipeSeekError
+				if errors.As(resetErr, &pipeSeekError) {
 					return ccerror.PipeSeekError{Err: err}
 				}
 				return resetErr
