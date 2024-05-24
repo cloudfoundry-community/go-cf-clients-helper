@@ -2,7 +2,7 @@ package ccversion
 
 const (
 	MinSupportedV2ClientVersion = "2.128.0"
-	MinSupportedClientVersionV8 = "3.99.0"
+	MinSupportedClientVersionV9 = "3.160.0"
 
 	MinVersionUpdateServiceNameWhenPlanNotVisibleV2  = "2.131.0"
 	MinVersionUpdateServiceInstanceMaintenanceInfoV2 = "2.135.0"
@@ -13,4 +13,6 @@ const (
 
 	MinVersionHTTP2RoutingV3   = "3.104.0"
 	MinVersionSpaceSupporterV3 = "3.104.0"
+
+	MinVersionLogRateLimitingV3 = "3.125.0"
 )

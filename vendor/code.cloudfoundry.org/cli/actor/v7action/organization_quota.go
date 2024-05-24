@@ -15,6 +15,7 @@ type QuotaLimits struct {
 	TotalServiceInstances *types.NullInt
 	TotalRoutes           *types.NullInt
 	TotalReservedPorts    *types.NullInt
+	TotalLogVolume        *types.NullInt
 }
 
 func (actor Actor) ApplyOrganizationQuotaByName(quotaName string, orgGUID string) (Warnings, error) {
@@ -75,10 +76,9 @@ func (actor Actor) GetOrganizationQuotas() ([]resources.OrganizationQuota, Warni
 
 func (actor Actor) GetOrganizationQuotaByName(orgQuotaName string) (resources.OrganizationQuota, Warnings, error) {
 	ccv3OrgQuotas, warnings, err := actor.CloudControllerClient.GetOrganizationQuotas(
-		ccv3.Query{
-			Key:    ccv3.NameFilter,
-			Values: []string{orgQuotaName},
-		},
+		ccv3.Query{Key: ccv3.NameFilter, Values: []string{orgQuotaName}},
+		ccv3.Query{Key: ccv3.PerPage, Values: []string{"1"}},
+		ccv3.Query{Key: ccv3.Page, Values: []string{"1"}},
 	)
 	if err != nil {
 		return resources.OrganizationQuota{}, Warnings(warnings), err
@@ -119,6 +119,7 @@ func createQuotaStruct(name string, limits QuotaLimits) resources.OrganizationQu
 		TotalMemory:       limits.TotalMemoryInMB,
 		InstanceMemory:    limits.PerProcessMemoryInMB,
 		TotalAppInstances: limits.TotalInstances,
+		TotalLogVolume:    limits.TotalLogVolume,
 	}
 	ServiceLimit := resources.ServiceLimit{
 		TotalServiceInstances: limits.TotalServiceInstances,
@@ -164,6 +165,7 @@ func convertUnlimitedToNil(apps *resources.AppLimit, routes *resources.RouteLimi
 		apps.TotalMemory,
 		apps.InstanceMemory,
 		apps.TotalAppInstances,
+		apps.TotalLogVolume,
 		services.TotalServiceInstances,
 		routes.TotalRoutes,
 		routes.TotalReservedPorts,

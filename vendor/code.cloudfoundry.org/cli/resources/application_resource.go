@@ -1,9 +1,10 @@
 package resources
 
 import (
+	"encoding/json"
+
 	"code.cloudfoundry.org/cli/api/cloudcontroller"
 	"code.cloudfoundry.org/cli/api/cloudcontroller/ccv3/constant"
-	"encoding/json"
 )
 
 // Application represents a Cloud Controller V3 Application.
@@ -24,6 +25,12 @@ type Application struct {
 	SpaceGUID string
 	// State is the desired state of the application.
 	State constant.ApplicationState
+}
+
+// ApplicationNameOnly represents only the name field of a Cloud Controller V3 Application
+type ApplicationNameOnly struct {
+	// Name is the name given to the application.
+	Name string `json:"name,omitempty"`
 }
 
 // MarshalJSON converts an Application into a Cloud Controller Application.

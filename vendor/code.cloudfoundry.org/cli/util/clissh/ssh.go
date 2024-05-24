@@ -19,7 +19,7 @@ import (
 
 	"code.cloudfoundry.org/cli/cf/ssh/sigwinch"
 	"code.cloudfoundry.org/cli/util/clissh/ssherror"
-	"github.com/moby/moby/pkg/term"
+	"github.com/moby/term"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/crypto/ssh"
 )
@@ -264,6 +264,7 @@ func (c *SecureShell) localForwardAcceptLoop(listener net.Listener, addr string)
 	for {
 		conn, err := listener.Accept()
 		if err != nil {
+			//nolint:staticcheck
 			if netErr, ok := err.(net.Error); ok && netErr.Temporary() {
 				time.Sleep(100 * time.Millisecond)
 				continue
