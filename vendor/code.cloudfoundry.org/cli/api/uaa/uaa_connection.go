@@ -4,7 +4,8 @@ import (
 	"bytes"
 	"crypto/x509"
 	"encoding/json"
-	"io/ioutil"
+	"errors"
+	"io"
 	"net"
 	"net/http"
 	"net/url"
@@ -73,7 +74,7 @@ func (*UAAConnection) handleStatusCodes(response *http.Response, passedResponse 
 func (connection *UAAConnection) populateResponse(response *http.Response, passedResponse *Response) error {
 	passedResponse.HTTPResponse = response
 
-	rawBytes, err := ioutil.ReadAll(response.Body)
+	rawBytes, err := io.ReadAll(response.Body)
 	defer response.Body.Close()
 	if err != nil {
 		return err
@@ -100,7 +101,7 @@ func (connection *UAAConnection) populateResponse(response *http.Response, passe
 func (connection *UAAConnection) processRequestErrors(request *http.Request, err error) error {
 	switch e := err.(type) {
 	case *url.Error:
-		if _, ok := e.Err.(x509.UnknownAuthorityError); ok {
+		if errors.As(err, &x509.UnknownAuthorityError{}) {
 			return UnverifiedServerError{
 				URL: request.URL.String(),
 			}

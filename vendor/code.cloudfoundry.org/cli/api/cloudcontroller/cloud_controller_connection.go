@@ -2,7 +2,8 @@ package cloudcontroller
 
 import (
 	"crypto/x509"
-	"io/ioutil"
+	"errors"
+	"io"
 	"net"
 	"net/http"
 	"net/url"
@@ -54,6 +55,7 @@ func (connection *CloudControllerConnection) Make(request *Request, passedRespon
 	if err != nil {
 		return connection.processRequestErrors(request.Request, err)
 	}
+	defer response.Body.Close()
 
 	return connection.populateResponse(response, passedResponse)
 }
@@ -62,8 +64,7 @@ func (*CloudControllerConnection) handleStatusCodes(response *http.Response, pas
 	if response.StatusCode == http.StatusNoContent {
 		passedResponse.RawResponse = []byte("{}")
 	} else {
-		rawBytes, err := ioutil.ReadAll(response.Body)
-		defer response.Body.Close()
+		rawBytes, err := io.ReadAll(response.Body)
 		if err != nil {
 			return err
 		}
@@ -133,18 +134,21 @@ func (connection *CloudControllerConnection) populateResponse(response *http.Res
 func (*CloudControllerConnection) processRequestErrors(request *http.Request, err error) error {
 	switch e := err.(type) {
 	case *url.Error:
-		switch urlErr := e.Err.(type) {
-		case x509.UnknownAuthorityError:
+		if errors.As(err, &x509.UnknownAuthorityError{}) {
 			return ccerror.UnverifiedServerError{
 				URL: request.URL.String(),
 			}
-		case x509.HostnameError:
-			return ccerror.SSLValidationHostnameError{
-				Message: urlErr.Error(),
-			}
-		default:
-			return ccerror.RequestError{Err: e}
 		}
+
+		hostnameError := x509.HostnameError{}
+		if errors.As(err, &hostnameError) {
+			return ccerror.SSLValidationHostnameError{
+				Message: hostnameError.Error(),
+			}
+		}
+
+		return ccerror.RequestError{Err: e}
+
 	default:
 		return err
 	}

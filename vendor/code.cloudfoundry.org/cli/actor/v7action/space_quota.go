@@ -31,6 +31,7 @@ func (actor Actor) CreateSpaceQuota(spaceQuotaName string, orgGuid string, limit
 				TotalMemory:       limits.TotalMemoryInMB,
 				InstanceMemory:    limits.PerProcessMemoryInMB,
 				TotalAppInstances: limits.TotalInstances,
+				TotalLogVolume:    limits.TotalLogVolume,
 			},
 			Services: resources.ServiceLimit{
 				TotalServiceInstances: limits.TotalServiceInstances,
@@ -80,14 +81,10 @@ func (actor Actor) DeleteSpaceQuotaByName(quotaName string, orgGUID string) (War
 
 func (actor Actor) GetSpaceQuotaByName(spaceQuotaName string, orgGUID string) (resources.SpaceQuota, Warnings, error) {
 	ccv3Quotas, warnings, err := actor.CloudControllerClient.GetSpaceQuotas(
-		ccv3.Query{
-			Key:    ccv3.OrganizationGUIDFilter,
-			Values: []string{orgGUID},
-		},
-		ccv3.Query{
-			Key:    ccv3.NameFilter,
-			Values: []string{spaceQuotaName},
-		},
+		ccv3.Query{Key: ccv3.OrganizationGUIDFilter, Values: []string{orgGUID}},
+		ccv3.Query{Key: ccv3.NameFilter, Values: []string{spaceQuotaName}},
+		ccv3.Query{Key: ccv3.PerPage, Values: []string{"1"}},
+		ccv3.Query{Key: ccv3.Page, Values: []string{"1"}},
 	)
 
 	if err != nil {
@@ -137,6 +134,7 @@ func (actor Actor) UpdateSpaceQuota(currentName, orgGUID, newName string, limits
 				TotalMemory:       limits.TotalMemoryInMB,
 				InstanceMemory:    limits.PerProcessMemoryInMB,
 				TotalAppInstances: limits.TotalInstances,
+				TotalLogVolume:    limits.TotalLogVolume,
 			},
 			Services: resources.ServiceLimit{
 				TotalServiceInstances: limits.TotalServiceInstances,

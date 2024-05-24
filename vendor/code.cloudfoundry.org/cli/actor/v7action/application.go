@@ -226,7 +226,8 @@ func (actor Actor) GetUnstagedNewestPackageGUID(appGUID string) (string, Warning
 	packages, warnings, err := actor.CloudControllerClient.GetPackages(
 		ccv3.Query{Key: ccv3.AppGUIDFilter, Values: []string{appGUID}},
 		ccv3.Query{Key: ccv3.OrderBy, Values: []string{ccv3.CreatedAtDescendingOrder}},
-		ccv3.Query{Key: ccv3.PerPage, Values: []string{"1"}})
+		ccv3.Query{Key: ccv3.PerPage, Values: []string{"1"}},
+		ccv3.Query{Key: ccv3.Page, Values: []string{"1"}})
 	allWarnings = append(allWarnings, warnings...)
 	if err != nil {
 		return "", allWarnings, err
@@ -241,6 +242,7 @@ func (actor Actor) GetUnstagedNewestPackageGUID(appGUID string) (string, Warning
 		newestPackage.GUID,
 		ccv3.Query{Key: ccv3.StatesFilter, Values: []string{"STAGED"}},
 		ccv3.Query{Key: ccv3.PerPage, Values: []string{"1"}},
+		ccv3.Query{Key: ccv3.Page, Values: []string{"1"}},
 	)
 	allWarnings = append(allWarnings, warnings...)
 	if err != nil {
@@ -400,6 +402,17 @@ func (actor Actor) UpdateApplication(app resources.Application) (resources.Appli
 	return updatedApp, Warnings(warnings), nil
 }
 
+// UpdateApplicationName updates the name of an application
+func (actor Actor) UpdateApplicationName(newAppName string, appGUID string) (resources.Application, Warnings, error) {
+
+	updatedApp, warnings, err := actor.CloudControllerClient.UpdateApplicationName(newAppName, appGUID)
+	if err != nil {
+		return resources.Application{}, Warnings(warnings), err
+	}
+
+	return updatedApp, Warnings(warnings), nil
+}
+
 func (actor Actor) getDeployment(deploymentGUID string) (resources.Deployment, Warnings, error) {
 	deployment, warnings, err := actor.CloudControllerClient.GetDeployment(deploymentGUID)
 	if err != nil {
@@ -444,8 +457,8 @@ func (actor Actor) RenameApplicationByNameAndSpaceGUID(appName, newAppName, spac
 	if err != nil {
 		return resources.Application{}, allWarnings, err
 	}
-	application.Name = newAppName
-	application, warnings, err = actor.UpdateApplication(application)
+	appGUID := application.GUID
+	application, warnings, err = actor.UpdateApplicationName(newAppName, appGUID)
 	allWarnings = append(allWarnings, warnings...)
 	if err != nil {
 		return resources.Application{}, allWarnings, err

@@ -8,13 +8,14 @@ import (
 	"code.cloudfoundry.org/cli/api/cloudcontroller"
 	"code.cloudfoundry.org/cli/api/cloudcontroller/ccv3/constant"
 	"code.cloudfoundry.org/cli/api/cloudcontroller/ccv3/internal"
+	"code.cloudfoundry.org/cli/types"
 )
 
 // ProcessInstance represents a single process instance for a particular
 // application.
 type ProcessInstance struct {
-	// CPU is the current CPU usage of the instance.
-	CPU float64
+	// CPUEntitlement is the current CPU entitlement usage of the instance.
+	CPUEntitlement types.NullFloat64
 	// Details is information about errors placing the instance.
 	Details string
 	// DiskQuota is the maximum disk the instance is allowed to use.
@@ -29,8 +30,12 @@ type ProcessInstance struct {
 	IsolationSegment string
 	// MemoryQuota is the maximum memory the instance is allowed to use.
 	MemoryQuota uint64
-	// DiskUsage is the current memory usage of the instance.
+	// MemoryUsage is the current memory usage of the instance.
 	MemoryUsage uint64
+	// LogRateLimit is the maximum rate that the instance is allowed to log.
+	LogRateLimit int64
+	// LogRate is the current rate that the instance is logging.
+	LogRate uint64
 	// State is the state of the instance.
 	State constant.ProcessInstanceState
 	// Type is the process type for the instance.
@@ -47,13 +52,15 @@ func (instance *ProcessInstance) UnmarshalJSON(data []byte) error {
 		Index            int64  `json:"index"`
 		IsolationSegment string `json:"isolation_segment"`
 		MemQuota         uint64 `json:"mem_quota"`
+		LogRateLimit     int64  `json:"log_rate_limit"`
 		State            string `json:"state"`
 		Type             string `json:"type"`
 		Uptime           int64  `json:"uptime"`
 		Usage            struct {
-			CPU  float64 `json:"cpu"`
-			Mem  uint64  `json:"mem"`
-			Disk uint64  `json:"disk"`
+			CPUEntitlement types.NullFloat64 `json:"cpu_entitlement"`
+			Mem            uint64            `json:"mem"`
+			Disk           uint64            `json:"disk"`
+			LogRate        uint64            `json:"log_rate"`
 		} `json:"usage"`
 	}
 
@@ -62,7 +69,7 @@ func (instance *ProcessInstance) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
-	instance.CPU = inputInstance.Usage.CPU
+	instance.CPUEntitlement = inputInstance.Usage.CPUEntitlement
 	instance.Details = inputInstance.Details
 	instance.DiskQuota = inputInstance.DiskQuota
 	instance.DiskUsage = inputInstance.Usage.Disk
@@ -70,6 +77,8 @@ func (instance *ProcessInstance) UnmarshalJSON(data []byte) error {
 	instance.IsolationSegment = inputInstance.IsolationSegment
 	instance.MemoryQuota = inputInstance.MemQuota
 	instance.MemoryUsage = inputInstance.Usage.Mem
+	instance.LogRateLimit = inputInstance.LogRateLimit
+	instance.LogRate = inputInstance.Usage.LogRate
 	instance.State = constant.ProcessInstanceState(inputInstance.State)
 	instance.Type = inputInstance.Type
 	instance.Uptime, err = time.ParseDuration(fmt.Sprintf("%ds", inputInstance.Uptime))

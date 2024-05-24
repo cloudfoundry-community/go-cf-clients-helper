@@ -23,6 +23,8 @@ func (client *Client) GetApplicationByNameAndSpace(appName string, spaceGUID str
 	apps, warnings, err := client.GetApplications(
 		Query{Key: NameFilter, Values: []string{appName}},
 		Query{Key: SpaceGUIDFilter, Values: []string{spaceGUID}},
+		Query{Key: PerPage, Values: []string{"1"}},
+		Query{Key: Page, Values: []string{"1"}},
 	)
 	if err != nil {
 		return resources.Application{}, warnings, err
@@ -60,6 +62,19 @@ func (client *Client) UpdateApplication(app resources.Application) (resources.Ap
 		RequestName:  internal.PatchApplicationRequest,
 		URIParams:    internal.Params{"app_guid": app.GUID},
 		RequestBody:  app,
+		ResponseBody: &responseBody,
+	})
+
+	return responseBody, warnings, err
+}
+
+// UpdateApplicationName updates an application with the new name given
+func (client *Client) UpdateApplicationName(newAppName string, appGUID string) (resources.Application, Warnings, error) {
+	var responseBody resources.Application
+	_, warnings, err := client.MakeRequest(RequestParams{
+		RequestName:  internal.PatchApplicationRequest,
+		URIParams:    internal.Params{"app_guid": appGUID},
+		RequestBody:  resources.ApplicationNameOnly{Name: newAppName},
 		ResponseBody: &responseBody,
 	})
 

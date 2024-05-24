@@ -84,7 +84,8 @@ func (actor Actor) GetRouteDestinationByAppGUID(route resources.Route, appGUID s
 func (actor Actor) GetRoutesBySpace(spaceGUID string, labelSelector string) ([]resources.Route, Warnings, error) {
 	allWarnings := Warnings{}
 	queries := []ccv3.Query{
-		ccv3.Query{Key: ccv3.SpaceGUIDFilter, Values: []string{spaceGUID}},
+		{Key: ccv3.SpaceGUIDFilter, Values: []string{spaceGUID}},
+		{Key: ccv3.PerPage, Values: []string{ccv3.MaxPerPage}},
 	}
 	if len(labelSelector) > 0 {
 		queries = append(queries, ccv3.Query{Key: ccv3.LabelSelectorFilter, Values: []string{labelSelector}})
@@ -144,10 +145,9 @@ func (actor Actor) parseRoutePath(routePath string) (string, string, string, res
 
 func (actor Actor) GetRoute(routePath string, spaceGUID string) (resources.Route, Warnings, error) {
 	filters := []ccv3.Query{
-		{
-			Key:    ccv3.SpaceGUIDFilter,
-			Values: []string{spaceGUID},
-		},
+		{Key: ccv3.SpaceGUIDFilter, Values: []string{spaceGUID}},
+		{Key: ccv3.PerPage, Values: []string{"1"}},
+		{Key: ccv3.Page, Values: []string{"1"}},
 	}
 
 	host, path, port, domain, allWarnings, err := actor.parseRoutePath(routePath)
@@ -190,7 +190,8 @@ func (actor Actor) GetRoute(routePath string, spaceGUID string) (resources.Route
 func (actor Actor) GetRoutesByOrg(orgGUID string, labelSelector string) ([]resources.Route, Warnings, error) {
 	allWarnings := Warnings{}
 	queries := []ccv3.Query{
-		ccv3.Query{Key: ccv3.OrganizationGUIDFilter, Values: []string{orgGUID}},
+		{Key: ccv3.OrganizationGUIDFilter, Values: []string{orgGUID}},
+		{Key: ccv3.PerPage, Values: []string{ccv3.MaxPerPage}},
 	}
 	if len(labelSelector) > 0 {
 		queries = append(queries, ccv3.Query{Key: ccv3.LabelSelectorFilter, Values: []string{labelSelector}})
@@ -370,6 +371,8 @@ func (actor Actor) GetRouteByAttributes(domain resources.Domain, hostname string
 		{Key: ccv3.DomainGUIDFilter, Values: []string{domain.GUID}},
 		{Key: ccv3.HostsFilter, Values: []string{hostname}},
 		{Key: ccv3.PathsFilter, Values: []string{path}},
+		{Key: ccv3.PerPage, Values: []string{"1"}},
+		{Key: ccv3.Page, Values: []string{"1"}},
 	}
 
 	if domain.IsTCP() {
@@ -406,7 +409,15 @@ func (actor Actor) UnmapRoute(routeGUID string, destinationGUID string) (Warning
 	warnings, err := actor.CloudControllerClient.UnmapRoute(routeGUID, destinationGUID)
 	return Warnings(warnings), err
 }
+func (actor Actor) ShareRoute(routeGUID string, spaceGUID string) (Warnings, error) {
+	warnings, err := actor.CloudControllerClient.ShareRoute(routeGUID, spaceGUID)
+	return Warnings(warnings), err
+}
 
+func (actor Actor) UnshareRoute(routeGUID string, spaceGUID string) (Warnings, error) {
+	warnings, err := actor.CloudControllerClient.UnshareRoute(routeGUID, spaceGUID)
+	return Warnings(warnings), err
+}
 func (actor Actor) GetApplicationRoutes(appGUID string) ([]resources.Route, Warnings, error) {
 	allWarnings := Warnings{}
 
@@ -421,6 +432,11 @@ func (actor Actor) GetApplicationRoutes(appGUID string) ([]resources.Route, Warn
 	}
 
 	return routes, allWarnings, nil
+}
+
+func (actor Actor) MoveRoute(routeGUID string, spaceGUID string) (Warnings, error) {
+	warnings, err := actor.CloudControllerClient.MoveRoute(routeGUID, spaceGUID)
+	return Warnings(warnings), err
 }
 
 func getDomainName(fullURL, host, path string, port int) string {
