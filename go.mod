@@ -21,7 +21,7 @@ require (
 	code.cloudfoundry.org/go-log-cache/v2 v2.0.7 // indirect
 	code.cloudfoundry.org/go-loggregator/v9 v9.2.1 // indirect
 	code.cloudfoundry.org/jsonry v1.1.4 // indirect
-	code.cloudfoundry.org/tlsconfig v0.0.0-20240510172918-c1e19801fe80 // indirect
+	code.cloudfoundry.org/tlsconfig v0.0.0-20240522170710-79df114af82a // indirect
 	code.cloudfoundry.org/ykk v0.0.0-20170424192843-e4df4ce2fd4d // indirect
 	github.com/Azure/go-ansiterm v0.0.0-20230124172434-306776ec8161 // indirect
 	github.com/SermoDigital/jose v0.9.2-0.20161205224733-f6df55f235c2 // indirect
