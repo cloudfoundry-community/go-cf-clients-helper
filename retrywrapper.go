@@ -6,7 +6,6 @@ import (
 	"code.cloudfoundry.org/cli/api/cloudcontroller/ccerror"
 	"code.cloudfoundry.org/cli/api/router"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"reflect"
 )
@@ -46,7 +45,7 @@ func (retry *RetryRequest) Make(request *cloudcontroller.Request, passedResponse
 
 		// detect if body is ioutil.NopCloser(&bytes.Buffer)
 		// if so we reset the content the buffer to be able to redo request with same body
-		if reflect.TypeOf(request.Body) == reflect.TypeOf(ioutil.NopCloser) {
+		if reflect.TypeOf(request.Body) == reflect.TypeOf(io.NopCloser) {
 			reader := reflect.ValueOf(request.Body).FieldByName("Reader")
 			if buf, ok := reader.Interface().(*bytes.Buffer); ok {
 				data := buf.Bytes()
@@ -117,7 +116,7 @@ func (retry *retryRequestRouter) Make(request *router.Request, passedResponse *r
 		}
 		// detect if body is ioutil.NopCloser(&bytes.Buffer)
 		// if so we reset the content the buffer to be able to redo request with same body
-		if reflect.TypeOf(request.Body) == reflect.TypeOf(ioutil.NopCloser) {
+		if reflect.TypeOf(request.Body) == reflect.TypeOf(io.NopCloser) {
 			reader := reflect.ValueOf(request.Body).FieldByName("Reader")
 			if buf, ok := reader.Interface().(*bytes.Buffer); ok {
 				data := buf.Bytes()
