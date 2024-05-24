@@ -15,7 +15,7 @@ require (
 )
 
 require (
-	code.cloudfoundry.org/bytefmt v0.0.0-20231017140541-3b893ed0421b // indirect
+	code.cloudfoundry.org/bytefmt v0.0.0-20240524171005-f1d9d5c55b92 // indirect
 	code.cloudfoundry.org/cli-plugin-repo v0.0.0-20230525012251-b9c89116786e // indirect
 	code.cloudfoundry.org/clock v1.1.0 // indirect
 	code.cloudfoundry.org/go-log-cache/v2 v2.0.7 // indirect
@@ -34,7 +34,7 @@ require (
 	github.com/cppforlife/go-patch v0.2.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/fatih/color v1.17.0 // indirect
-	github.com/go-logr/logr v1.4.1 // indirect
+	github.com/go-logr/logr v1.4.2 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/google/gofuzz v1.2.0 // indirect
