@@ -146,10 +146,7 @@ func (s *Session) init(config *configv3.Config, configUaa *configv3.Config, conf
 	// create an uaa client with cf_username/cf_password or client_id/client secret
 	// to use it for authenticate requests
 	uaaClient := uaa.NewClient(config)
-	if _, err := uaaClient.GetAPIVersion(); err != nil {
-		return fmt.Errorf("unable to get API version: %s", err)
-	}
-
+	_, _ = uaaClient.GetAPIVersion()
 	uaaAuthWrapper := uaaWrapper.NewUAAAuthentication(nil, configUaa)
 	uaaClient.WrapConnection(uaaAuthWrapper)
 	uaaClient.WrapConnection(uaaWrapper.NewRetryRequest(config.RequestRetryCount()))
