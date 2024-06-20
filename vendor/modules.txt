@@ -8,7 +8,7 @@ code.cloudfoundry.org/cfnetworking-cli-api/cfnetworking/cfnetv1
 code.cloudfoundry.org/cfnetworking-cli-api/cfnetworking/cfnetv1/internal
 code.cloudfoundry.org/cfnetworking-cli-api/cfnetworking/networkerror
 code.cloudfoundry.org/cfnetworking-cli-api/cfnetworking/wrapper
-# code.cloudfoundry.org/cli v0.0.0-20240524142151-a2a685b5ea6e
+# code.cloudfoundry.org/cli v0.0.0-20240609151540-b78406a9b0ce
 ## explicit; go 1.22
 code.cloudfoundry.org/cli/actor/actionerror
 code.cloudfoundry.org/cli/actor/sharedaction
@@ -222,7 +222,7 @@ golang.org/x/sys/windows
 # golang.org/x/term v0.20.0
 ## explicit; go 1.18
 golang.org/x/term
-# golang.org/x/text v0.15.0
+# golang.org/x/text v0.16.0
 ## explicit; go 1.18
 golang.org/x/text/internal/language
 golang.org/x/text/internal/language/compact
