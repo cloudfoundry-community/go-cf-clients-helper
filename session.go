@@ -176,7 +176,7 @@ func (s *Session) init(config *configv3.Config, configUaa *configv3.Config, conf
 		return fmt.Errorf("error when authenticate on cf: %s", err)
 	}
 	if accessToken == "" {
-		return fmt.Errorf("a pair of username/password or a pair of client_id/client_secret muste be set.")
+		return fmt.Errorf("a pair of username/password or a pair of client_id/client_secret muste be set")
 	}
 
 	config.SetAccessToken(fmt.Sprintf("bearer %s", accessToken))
@@ -202,7 +202,7 @@ func (s *Session) init(config *configv3.Config, configUaa *configv3.Config, conf
 		uaaClientSess.WrapConnection(uaaWrapper.NewRetryRequest(config.RequestRetryCount()))
 		err = uaaClientSess.SetupResources(info.UAA(), info.Login())
 		if err != nil {
-			return fmt.Errorf("Error setup resource uaa: %s", err)
+			return fmt.Errorf("error setup resource uaa: %s", err)
 		}
 
 		var accessTokenSess string
@@ -222,10 +222,10 @@ func (s *Session) init(config *configv3.Config, configUaa *configv3.Config, conf
 		}
 
 		if err != nil {
-			return fmt.Errorf("Error when authenticate on uaa: %s", err)
+			return fmt.Errorf("error when authenticate on uaa: %s", err)
 		}
 		if accessTokenSess == "" {
-			return fmt.Errorf("a pair of pair of uaa_client_id/uaa_client_secret muste be set.")
+			return fmt.Errorf("a pair of pair of uaa_client_id/uaa_client_secret muste be set")
 		}
 		configUaa.SetAccessToken(fmt.Sprintf("bearer %s", accessTokenSess))
 		configUaa.SetRefreshToken(refreshTokenSess)
