@@ -1,4 +1,4 @@
-module github.com/cloudfoundry-community/go-cf-clients-helper/v3
+module github.com/cloudfoundry-community/go-cf-clients-helper/v2
 
 go 1.25.4
 
