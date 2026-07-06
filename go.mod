@@ -1,6 +1,6 @@
 module github.com/cloudfoundry-community/go-cf-clients-helper/v2
 
-go 1.26.2
+go 1.26.4
 
 exclude (
 	github.com/imdario/mergo v0.3.16
@@ -10,7 +10,7 @@ exclude (
 	github.com/vito/go-interact v1.0.2
 )
 
-require code.cloudfoundry.org/cli/v8 v8.18.3
+require code.cloudfoundry.org/cli/v8 v8.18.4
 
 require (
 	code.cloudfoundry.org/bytefmt v0.78.0 // indirect
